@@ -359,6 +359,14 @@ TestRecorder.ElementInfo.prototype.getCleanCSSSelector = function(element) {
     accuracy = document.querySelectorAll(selector).length;
     if (accuracy == 1) return selector;
   }
+  if(element.dataset.automationId){
+      tmp_selector = `[data-automation-id="${element.dataset.automationId }"]`;
+      if (document.querySelectorAll(tmp_selector).length < accuracy) {
+          selector = tmp_selector;
+          accuracy = document.querySelectorAll(selector).length;
+          if (accuracy == 1) return selector;
+      }
+  }
   if (element.className) {
     tmp_selector = "." + element.className.trim().replace(/ /g, ".");
     if (document.querySelectorAll(tmp_selector).length < accuracy) {
