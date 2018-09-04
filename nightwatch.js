@@ -65,7 +65,6 @@ NightwatchRenderer.prototype.pyout = function(text) {
 NightwatchRenderer.prototype.pyrepr = function(text, escape) {
   // todo: handle non--strings & quoting
   var s = "'" + text + "'";
-  if (escape) s = s.replace(/(['"])/g, "\\$1");
   return s;
 };
 
@@ -389,8 +388,8 @@ NightwatchRenderer.prototype.checkPageLocation = function(item) {
 
 NightwatchRenderer.prototype.checkTextPresent = function(item) {
   var selector =
-    '"//*[contains(text(), ' + this.pyrepr(item.text, true) + ')]"';
-  this.waitAndTestSelector(selector, "xPath");
+    `${item.info.tagName.toLowerCase()}:contains(${this.pyrepr(item.text, true)})`;
+  this.waitAndTestSelector(selector);
 };
 
 NightwatchRenderer.prototype.checkValue = function(item) {
@@ -480,9 +479,8 @@ NightwatchRenderer.prototype.waitAndTestSelector = function(
   xpathSelector
 ) {
   xpathSelector && this.stmt(".useXpath()");
-  console.log("wait and test selector");
-  this.stmt(".waitForElementVisible(" + selector + ", DEFAULT_TIMEOUT)", 3);
-  this.stmt(".expect.element(" + selector + ").visible(" + selector + ")", 3);
+  this.stmt(`.getEl("${selector}")`);
+  this.stmt(`.assert.selectorHasLength("${selector}", 1)`);
   xpathSelector && this.stmt(".useCss()");
 };
 
