@@ -325,7 +325,8 @@ NightwatchRenderer.prototype.click = function(item) {
     }
     xpath_selector && this.stmt(".useXpath()");
     console.log("xpath: " + selector);
-    this.stmt(".clickEl(" + selector + ")", 3);
+    //.clickEl("[data-automation-id="return-order-item-6"] .elc-icon.elc-icon-ok")
+    this.stmt(`.clickEl(${selector})`);
     xpath_selector && this.stmt(".useCss()");
   }
 };
@@ -347,11 +348,7 @@ NightwatchRenderer.prototype.getFormSelector = function(item) {
 NightwatchRenderer.prototype.keypress = function(item) {
   var text = item.text.replace("\n", "").replace("\r", "\\r");
   console.log("key: " + text);
-  this.stmt(
-    '.waitForElementVisible("' + this.getControl(item) + '", DEFAULT_TIMEOUT)',
-    3
-  );
-  this.stmt('.setValue("' + this.getControl(item) + '", "' + text + '")', 3);
+  this.stmt('.setElValue("' + this.getControl(item) + '", "' + text + '")');
 };
 
 NightwatchRenderer.prototype.submit = function(item) {
@@ -366,7 +363,7 @@ NightwatchRenderer.prototype.screenShot = function(item) {
 };
 
 NightwatchRenderer.prototype.comment = function(item) {
-  this.stmt("// comment? todo: find out this case", 3);
+  this.stmt(`// ${item.text}`, 3);
   //var lines = item.text.split('\n');
   //this.stmt('casper.then(function() {');
   //for (var i=0; i < lines.length; i++) {
@@ -411,31 +408,17 @@ NightwatchRenderer.prototype.checkValue = function(item) {
 };
 
 NightwatchRenderer.prototype.checkText = function(item) {
-  var selector = "";
-  if (item.info.type == "submit" || item.info.type == "button") {
-    selector = '"//input[@value=' + this.pyrepr(item.text, true) + ']"';
-  } else {
-    selector =
-      "//*[normalize-space(text())=" +
-      this.cleanStringForXpath(item.text, true) +
-      "]";
-  }
-  this.waitAndTestSelector(selector, "xPath");
+
+    var selector =
+          `${item.info.tagName.toLowerCase()}:contains(${this.pyrepr(item.text, true)})`;
+      this.waitAndTestSelector(selector);
 };
 
 NightwatchRenderer.prototype.checkHref = function(item) {
   var href = this.pyrepr(this.shortUrl(item.info.href));
-  var xpath_selector = this.getLinkXPath(item);
-  if (xpath_selector) {
-    // todo: add switcher for xpath/css modes
-    selector = '"//a[' + xpath_selector + " and @href=" + href + ']"';
-  } else {
-    selector = item.info.selector + "[href=" + href + "]";
-  }
-  xpath_selector && this.stmt(".useXpath()");
-  // CM: this.stmt('.assert.elementPresent('+selector+')');
-  this.stmt("expect.element(" + selector + ").to.be.visible");
-  xpath_selector && this.stmt(".useCss()");
+
+  var  selector = item.info.selector + "[href=" + href + "]";
+    this.waitAndTestSelector(selector);
 };
 
 NightwatchRenderer.prototype.checkEnabled = function(item) {
@@ -479,8 +462,7 @@ NightwatchRenderer.prototype.waitAndTestSelector = function(
   xpathSelector
 ) {
   xpathSelector && this.stmt(".useXpath()");
-  this.stmt(`.getEl("${selector}")`);
-  this.stmt(`.assert.selectorHasLength("${selector}", 1)`);
+  this.stmt(`.assert.elLengthGreaterThan("${selector}","length", 0)`);//TODO: select from dom
   xpathSelector && this.stmt(".useCss()");
 };
 
