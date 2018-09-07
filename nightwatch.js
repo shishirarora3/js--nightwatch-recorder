@@ -384,59 +384,32 @@ NightwatchRenderer.prototype.checkPageLocation = function(item) {
 };
 
 NightwatchRenderer.prototype.checkTextPresent = function(item) {
-  var selector =
-    `${item.info.tagName.toLowerCase()}:contains(${this.pyrepr(item.text, true)})`;
-  this.waitAndTestSelector(selector);
+  this.waitAndTestSelector(item);
 };
 
 NightwatchRenderer.prototype.checkValue = function(item) {
-  var type = item.info.type;
-  var way = this.getControlXPath(item);
-  var selector = "";
-  var isXpath;
-  if (type == "checkbox" || type == "radio") {
-    var selected;
-    if (item.info.checked) selected = "@checked";
-    else selected = "not(@checked)";
-    selector = '"//input[' + way + " and " + selected + ']"';
-  } else {
-    var value = this.pyrepr(item.info.value);
-    var tag = item.info.tagName.toLowerCase();
-    selector = '"//' + tag + "[" + way + " and @value=" + value + ']"';
-  }
-  this.waitAndTestSelector(selector, "xPath");
+  this.waitAndTestSelector(item);
 };
 
 NightwatchRenderer.prototype.checkText = function(item) {
 
-    var selector =
-          `${item.info.tagName.toLowerCase()}:contains(${this.pyrepr(item.text, true)})`;
-      this.waitAndTestSelector(selector);
+      this.waitAndTestSelector(item);
 };
 
 NightwatchRenderer.prototype.checkHref = function(item) {
-  var href = this.pyrepr(this.shortUrl(item.info.href));
-
-  var  selector = item.info.selector + "[href=" + href + "]";
-    this.waitAndTestSelector(selector);
+    this.waitAndTestSelector(item);
 };
 
 NightwatchRenderer.prototype.checkEnabled = function(item) {
   var way = this.getControlXPath(item);
   var tag = item.info.tagName.toLowerCase();
-  this.waitAndTestSelector(
-    '"//' + tag + "[" + way + ' and not(@disabled)]"',
-    "xPath"
-  );
+  this.waitAndTestSelector(item);
 };
 
 NightwatchRenderer.prototype.checkDisabled = function(item) {
   var way = this.getControlXPath(item);
   var tag = item.info.tagName.toLowerCase();
-  this.waitAndTestSelector(
-    '"//' + tag + "[" + way + ' and @disabled]"',
-    "xPath"
-  );
+  this.waitAndTestSelector(item);
 };
 
 NightwatchRenderer.prototype.checkSelectValue = function(item) {
@@ -454,15 +427,15 @@ NightwatchRenderer.prototype.checkSelectOptions = function(item) {
 
 NightwatchRenderer.prototype.checkImageSrc = function(item) {
   var src = this.pyrepr(this.shortUrl(item.info.src));
-  this.waitAndTestSelector('"//img[@src=' + src + ']"', "xPath");
+  this.waitAndTestSelector(item);
 };
 
 NightwatchRenderer.prototype.waitAndTestSelector = function(
-  selector,
+  item,
   xpathSelector
 ) {
   xpathSelector && this.stmt(".useXpath()");
-  this.stmt(`.assert.elLengthGreaterThan("${selector}","length", 0)`);//TODO: select from dom
+  this.stmt(`.assert.elContainsText("${item.info.selector}", ${this.pyrepr(item.text, true)})`);
   xpathSelector && this.stmt(".useCss()");
 };
 

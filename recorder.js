@@ -720,6 +720,11 @@ TestRecorder.ContextMenu.prototype.checkTextPresent = function() {
   var t = contextmenu.target;
   var s = contextmenu.selected;
   var et = TestRecorder.EventTypes;
+  var depth = 0;
+  while(!!t && s!==t.innerText && depth<10){
+    t=t.parentNode;
+      depth++
+  }
   var e = new TestRecorder.ElementEvent(et.CheckTextPresent, t, s);
   contextmenu.selected = null;
   contextmenu.record(e);
